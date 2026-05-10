@@ -192,7 +192,7 @@ func (c *C) setValue(v interface{}, req *http.Request) (interface{}, int) {
 
 	// call update funcs
 	for _, fn := range funcs {
-		fn(c, newVal, oldVal, req)
+		go fn(c, newVal, oldVal, req)
 	}
 
 	return response, 0
