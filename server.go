@@ -40,7 +40,8 @@ type Server struct {
 
 	// Ifaces specifies at which interface the
 	// associated dnssd service is announced.
-	Ifaces []string
+	Ifaces          []string
+	AdvertiseIPType dnssd.IPType
 
 	MfiCompliant bool   // default false
 	Protocol     string // default "1.0"
@@ -521,13 +522,14 @@ func (s *Server) service() (dnssd.Service, error) {
 	// [Radar] http://openradar.appspot.com/radar?id=4931940373233664
 	stripped := strings.Replace(s.a.Info.Name.Value(), " ", "_", -1)
 	cfg := dnssd.Config{
-		Name:   normalize(stripped),
-		Type:   "_hap._tcp",
-		Domain: "local",
-		Host:   strings.Replace(s.uuid, ":", "", -1), // use the id (without the colons) to get unique hostnames
-		Text:   s.txtRecords(),
-		Port:   s.port,
-		Ifaces: s.Ifaces,
+		Name:            normalize(stripped),
+		Type:            "_hap._tcp",
+		Domain:          "local",
+		Host:            strings.Replace(s.uuid, ":", "", -1), // use the id (without the colons) to get unique hostnames
+		Text:            s.txtRecords(),
+		Port:            s.port,
+		Ifaces:          s.Ifaces,
+		AdvertiseIPType: s.AdvertiseIPType,
 	}
 
 	return dnssd.NewService(cfg)
