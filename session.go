@@ -23,6 +23,12 @@ func setConn(addr string, conn *conn) {
 	cons[addr] = conn
 }
 
+func deleteConnection(addr string) {
+	mux.Lock()
+	defer mux.Unlock()
+	delete(cons, addr)
+}
+
 func getConn(req *http.Request) *conn {
 	mux.Lock()
 	defer mux.Unlock()

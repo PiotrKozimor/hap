@@ -1,6 +1,9 @@
 package hap
 
 import (
+	"errors"
+	"net"
+
 	"github.com/brutella/hap/accessory"
 	"github.com/brutella/hap/characteristic"
 	"github.com/brutella/hap/log"
@@ -64,7 +67,15 @@ func sendNotification(a *accessory.A, c *characteristic.C, req *http.Request) er
 		// Check which connection has events enabled.
 		if c.HasEventsEnabled(conn.RemoteAddr().String()) {
 			log.Debug.Printf("send event to %s:\n%s\n", conn.RemoteAddr(), string(b))
-			conn.Write(b)
+			_, err := conn.Write(b)
+			if err != nil {
+				if errors.Is(err, net.ErrClosed) {
+					log.Info.Printf("cleaning up closed network connection: %s", conn.RemoteAddr())
+					deleteConnection(conn.RemoteAddr().String())
+				} else {
+					log.Info.Printf("failed to send event to: %s %v", conn.RemoteAddr(), err)
+				}
+			}
 		}
 	}
 
